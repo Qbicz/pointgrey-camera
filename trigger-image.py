@@ -15,16 +15,6 @@
 #  SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
 #  THIS SOFTWARE OR ITS DERIVATIVES.
 # =============================================================================
-#
-#  Trigger.py shows how to trigger the camera. It relies on information
-#  provided in the Enumeration, Acquisition, and NodeMapInfo examples.
-#
-#  It can also be helpful to familiarize yourself with the ImageFormatControl
-#  and Exposure examples. As they are somewhat shorter and simpler, either
-#  provides a strong introduction to camera customization.
-#
-#  This example shows the process of configuring, using, and cleaning up a
-#  camera for use with both a software and a hardware trigger.
 
 import PySpin
 import datetime, threading, time
@@ -38,32 +28,33 @@ class TriggerType:
 CHOSEN_TRIGGER = TriggerType.SOFTWARE
 
 
-def timer_trigger(cam, interval=1):
+def timer_trigger(cam, nodemap, nodemap_tldevice, interval=1):
     """
         Trigger image capture after interval. By default each 1 second.
     """
     next_call = time.time()
-    nodemap = cam.GetNodeMap()
     while True:
         print 'Trigger image -', datetime.datetime.now()
         next_call = next_call + interval;
 
-        # Execute software trigger
-        node_softwaretrigger_cmd = PySpin.CCommandPtr(nodemap.GetNode("TriggerSoftware"))
-        if not PySpin.IsAvailable(node_softwaretrigger_cmd) or not PySpin.IsWritable(node_softwaretrigger_cmd):
-            print "Unable to execute trigger. Aborting..."
-            return False
+        acquire_images(cam, nodemap, nodemap_tldevice)
 
-        node_softwaretrigger_cmd.Execute()
+        # Execute software trigger
+#node_softwaretrigger_cmd = PySpin.CCommandPtr(nodemap.GetNode("TriggerSoftware"))
+#        if not PySpin.IsAvailable(node_softwaretrigger_cmd) or not PySpin.IsWritable(node_softwaretrigger_cmd):
+#            print "Unable to execute trigger. Aborting..."
+#            return False
+
+#        node_softwaretrigger_cmd.Execute()
 
         # Sleep in this thread until next time interval
         time.sleep(next_call - time.time())
 
-def timer_trigger_start(cam):
+def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     """
         Start image triggering.
     """
-    timerThread = threading.Thread(target=timer_trigger, args=(cam,))
+    timerThread = threading.Thread(target=timer_trigger, args=(cam, nodemap, nodemap_tldevice))
     timerThread.daemon = True
     timerThread.start()
 
@@ -429,7 +420,7 @@ def run_single_camera(cam):
         if configure_trigger(cam) is False:
             return False
 
-        timer_trigger_start(cam)
+        timer_trigger_start(cam, nodemap, nodemap_tldevice)
         print 'Timer trigger started for current camera'
 
         # Acquire images
