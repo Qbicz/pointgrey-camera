@@ -29,6 +29,7 @@
 import PySpin
 import datetime, threading, time
 
+
 class TriggerType:
     SOFTWARE = 1
     HARDWARE = 2
@@ -37,11 +38,12 @@ class TriggerType:
 CHOSEN_TRIGGER = TriggerType.SOFTWARE
 
 
-def timer_trigger(interval=1):
+def timer_trigger(cam, interval=1):
     """
         Trigger image capture after interval. By default each 1 second.
     """
     next_call = time.time()
+    nodemap = cam.GetNodeMap()
     while True:
         print 'Trigger image -', datetime.datetime.now()
         next_call = next_call + interval;
@@ -57,11 +59,11 @@ def timer_trigger(interval=1):
         # Sleep in this thread until next time interval
         time.sleep(next_call - time.time())
 
-def timer_trigger_start():
+def timer_trigger_start(cam):
     """
         Start image triggering.
     """
-    timerThread = threading.Thread(target=timer_trigger)
+    timerThread = threading.Thread(target=timer_trigger, args=(cam))
     timerThread.daemon = True
     timerThread.start()
 
@@ -427,8 +429,8 @@ def run_single_camera(cam):
         if configure_trigger(cam) is False:
             return False
 
-        timer_trigger_start()
-        print 'Timer trigger started'
+        timer_trigger_start(cam)
+        print 'Timer trigger started for current camera'
 
         # Acquire images
         result &= acquire_images(cam, nodemap, nodemap_tldevice)
