@@ -27,7 +27,7 @@
 #  camera for use with both a software and a hardware trigger.
 
 import PySpin
-
+import datetime, threading, time
 
 class TriggerType:
     SOFTWARE = 1
@@ -35,6 +35,35 @@ class TriggerType:
 
 
 CHOSEN_TRIGGER = TriggerType.SOFTWARE
+
+
+def timer_trigger(interval=1):
+    """
+        Trigger image capture after interval. By default each 1 second.
+    """
+    next_call = time.time()
+    while True:
+        print 'Trigger image -', datetime.datetime.now()
+        next_call = next_call + interval;
+
+        # Execute software trigger
+        node_softwaretrigger_cmd = PySpin.CCommandPtr(nodemap.GetNode("TriggerSoftware"))
+        if not PySpin.IsAvailable(node_softwaretrigger_cmd) or not PySpin.IsWritable(node_softwaretrigger_cmd):
+            print "Unable to execute trigger. Aborting..."
+            return False
+
+        node_softwaretrigger_cmd.Execute()
+
+        # Sleep in this thread until next time interval
+        time.sleep(next_call - time.time())
+
+def timer_trigger_start():
+    """
+        Start image triggering.
+    """
+    timerThread = threading.Thread(target=timer_trigger)
+    timerThread.daemon = True
+    timerThread.start()
 
 
 def configure_trigger(cam):
@@ -219,9 +248,9 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
         if PySpin.IsAvailable(node_device_serial_number) and PySpin.IsReadable(node_device_serial_number):
             device_serial_number = node_device_serial_number.GetValue()
             print "Device serial number retrieved as %s..." % device_serial_number
-        
+
         image_count = 0
-				
+
         # Retrieve, convert, and save images
         while True:
             try:
@@ -305,7 +334,7 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
 def reset_trigger(nodemap):
     """
     This function returns the camera to a normal state by turning off trigger mode.
-  
+
     :param nodemap: Transport layer device nodemap.
     :type nodemap: INodeMap
     :returns: True if successful, False otherwise.
@@ -397,6 +426,9 @@ def run_single_camera(cam):
         # Configure trigger
         if configure_trigger(cam) is False:
             return False
+
+        timer_trigger_start()
+        print 'Timer trigger started'
 
         # Acquire images
         result &= acquire_images(cam, nodemap, nodemap_tldevice)
