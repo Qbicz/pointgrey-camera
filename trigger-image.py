@@ -63,7 +63,7 @@ def timer_trigger_start(cam):
     """
         Start image triggering.
     """
-    timerThread = threading.Thread(target=timer_trigger, args=(cam))
+    timerThread = threading.Thread(target=timer_trigger, args=(cam,))
     timerThread.daemon = True
     timerThread.start()
 
