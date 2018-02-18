@@ -67,7 +67,7 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
     global mutex_cam
 
     print 'Waiting for mutex...'
-    mutex_available = mutex_cam.acquire(blocking=False)
+    mutex_available = mutex_cam.acquire(False) # non-blocking
     if mutex_available == False:
         print 'Mutex occupied!'
         return False
