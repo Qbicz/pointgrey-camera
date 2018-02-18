@@ -28,6 +28,9 @@ class TriggerType:
 CHOSEN_TRIGGER = TriggerType.SOFTWARE
 
 
+mutex_cam = threading.Lock()
+
+
 def timer_trigger(cam, nodemap, nodemap_tldevice, interval=1):
     """
         Trigger image capture after interval. By default each 1 second.
@@ -199,6 +202,12 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
     :rtype: bool
     """
 
+    global mutex_cam
+
+    print 'Waiting for mutex...'
+    mutex_cam.acquire()
+    print 'Acquired mutex!'
+
     print "*** IMAGE ACQUISITION ***\n"
     try:
         result = True
@@ -320,6 +329,9 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
     except PySpin.SpinnakerException as ex:
         print "Error: %s" % ex
         return False
+
+    mutex_cam.release()
+    print 'Released mutex.'
 
     return result
 
