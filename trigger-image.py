@@ -121,9 +121,6 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
         # Retrieve, convert, and save images
         while True:
             try:
-                #  Retrieve the next image from the trigger
-                result &= grab_next_image_by_trigger(nodemap, cam)
-
                 #  Retrieve next received image
                 image_result = cam.GetNextImage()
 
