@@ -35,8 +35,6 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
     :rtype: bool
     """
 
-    global image_count
-
     print "*** IMAGE ACQUISITION ***\n"
     try:
         result = True
@@ -110,6 +108,8 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
         if PySpin.IsAvailable(node_device_serial_number) and PySpin.IsReadable(node_device_serial_number):
             device_serial_number = node_device_serial_number.GetValue()
             print "Device serial number retrieved as %s..." % device_serial_number
+
+        global image_count
 
         # Retrieve, convert, and save images
         while True:
