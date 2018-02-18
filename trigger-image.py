@@ -28,8 +28,6 @@
 
 import PySpin
 
-NUM_IMAGES = 10  # number of images to grab
-
 
 class TriggerType:
     SOFTWARE = 1
@@ -167,8 +165,7 @@ def grab_next_image_by_trigger(nodemap, cam):
 
 def acquire_images(cam, nodemap, nodemap_tldevice):
     """
-    This function acquires and saves 10 images from a device.
-    Please see Acquisition example for more in-depth comments on acquiring images.
+    This function acquires and saves images from a device.
 
     :param cam: Camera to acquire images from.
     :param nodemap: Device nodemap.
@@ -222,11 +219,12 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
         if PySpin.IsAvailable(node_device_serial_number) and PySpin.IsReadable(node_device_serial_number):
             device_serial_number = node_device_serial_number.GetValue()
             print "Device serial number retrieved as %s..." % device_serial_number
-
+        
+        image_count = 0
+				
         # Retrieve, convert, and save images
-        for i in range(NUM_IMAGES):
+        while True:
             try:
-
                 #  Retrieve the next image from the trigger
                 result &= grab_next_image_by_trigger(nodemap, cam)
 
@@ -247,9 +245,9 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                     #  name a few.
                     width = image_result.GetWidth()
                     height = image_result.GetHeight()
-                    print "Grabbed Image %d, width = %d, height = %d" % (i, width, height)
+                    print "Grabbed Image %d, width = %d, height = %d" % (image_count, width, height)
 
-                    #  Convert image to mono 8
+                    #  Convert image to RGB 8-bit
                     #
                     #  *** NOTES ***
                     #  Images can be converted between pixel formats by using
@@ -259,13 +257,13 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                     #
                     #  When converting images, color processing algorithm is an
                     #  optional parameter.
-                    image_converted = image_result.Convert(PySpin.PixelFormat_Mono8, PySpin.HQ_LINEAR)
+                    image_converted = image_result.Convert(PySpin.PixelFormat_RGB8, PySpin.HQ_LINEAR)
 
                     # Create a unique filename
                     if device_serial_number:
-                        filename = "Trigger-%s-%d.jpg" % (device_serial_number, i)
+                        filename = "Trigger-%s-%d.jpg" % (device_serial_number, image_count)
                     else:  # if serial number is empty
-                        filename = "Trigger-%d.jpg" % i
+                        filename = "Trigger-%d.jpg" % image_count
 
                     # Save image
                     #
@@ -283,6 +281,7 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                     #  images) need to be released in order to keep from filling the
                     #  buffer.
                     image_result.Release()
+                    image_count += 1
                     print ""
 
             except PySpin.SpinnakerException as ex:
