@@ -38,6 +38,7 @@ def timer_trigger(cam, nodemap, nodemap_tldevice, interval=1):
         # Sleep in this thread until next time interval
         time.sleep(next_call - time.time())
 
+
 def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     """
         Start image triggering.
@@ -45,9 +46,6 @@ def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     timerThread = threading.Thread(target=timer_trigger, args=(cam, nodemap, nodemap_tldevice))
     timerThread.daemon = True
     timerThread.start()
-
-
-
 
 
 def acquire_images(cam, nodemap, nodemap_tldevice):
@@ -262,8 +260,10 @@ def run_single_camera(cam):
         timer_trigger_start(cam, nodemap, nodemap_tldevice)
         print 'Timer trigger started for current camera'
 
+        raw_input('Press Enter to quit')
+
         # Acquire images
-        result &= acquire_images(cam, nodemap, nodemap_tldevice)
+        #result &= acquire_images(cam, nodemap, nodemap_tldevice)
 
         # Deinitialize camera
         cam.DeInit()
