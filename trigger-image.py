@@ -28,12 +28,26 @@ def timer_trigger(cam, nodemap, nodemap_tldevice, interval=1):
         Trigger image capture after interval. By default each 1 second.
     """
 
+    global mutex_cam
+
     next_call = time.time()
     while True:
         print 'Trigger image -', datetime.datetime.now()
         next_call = next_call + interval;
 
-        acquire_images(cam, nodemap, nodemap_tldevice)
+
+        print 'Waiting for mutex...'
+        mutex_available = mutex_cam.acquire(False) # non-blocking
+        if mutex_available == False:
+            print 'Mutex occupied!'
+            return False
+        print 'Acquired mutex!'
+
+        result = acquire_images(cam, nodemap, nodemap_tldevice)
+        print 'acquire_images returned:', result
+
+        mutex_cam.release()
+        print 'Released mutex.'
 
         # Sleep in this thread until next time interval
         time.sleep(next_call - time.time())
@@ -61,15 +75,6 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
     :return: True if successful, False otherwise.
     :rtype: bool
     """
-
-    global mutex_cam
-
-    print 'Waiting for mutex...'
-    mutex_available = mutex_cam.acquire(False) # non-blocking
-    if mutex_available == False:
-        print 'Mutex occupied!'
-        return False
-    print 'Acquired mutex!'
 
     print "*** IMAGE ACQUISITION ***\n"
     try:
@@ -190,9 +195,6 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
         print "Error: %s" % ex
         mutex_cam.release()
         return False
-
-    mutex_cam.release()
-    print 'Released mutex.'
 
     return result
 
