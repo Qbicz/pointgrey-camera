@@ -18,6 +18,7 @@
 
 import PySpin
 import datetime, threading, time
+import weakref
 
 
 mutex_cam = threading.Lock()
