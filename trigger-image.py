@@ -61,8 +61,7 @@ def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     """
         Start image triggering.
     """
-    cam_ref = weakref.ref(cam)
-    timerThread = threading.Thread(target=timer_trigger, args=(cam_ref(), nodemap, nodemap_tldevice))
+    timerThread = threading.Thread(target=timer_trigger, args=(cam, nodemap, nodemap_tldevice))
     timerThread.daemon = True
     timerThread.start()
 
@@ -264,7 +263,8 @@ def run_single_camera(cam):
         # Retrieve GenICam nodemap
         nodemap = cam.GetNodeMap()
 
-        timer_trigger_start(cam, nodemap, nodemap_tldevice)
+        cam_ref = weakref.ref(cam)
+        timer_trigger_start(cam_ref(), nodemap, nodemap_tldevice)
         print 'Timer trigger started for current camera'
 
         raw_input('Press Enter to quit')
