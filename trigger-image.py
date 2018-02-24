@@ -35,22 +35,25 @@ def timer_trigger(cam, nodemap, nodemap_tldevice, interval=1):
         print 'Trigger image -', datetime.datetime.now()
         next_call = next_call + interval;
 
-
-        print 'Waiting for mutex...'
         mutex_available = mutex_cam.acquire(False) # non-blocking
         if mutex_available == False:
-            print 'Mutex occupied!'
-            return False
-        print 'Acquired mutex!'
+            print '\tMutex occupied!'
+            continue
+        print '\tAcquired mutex!'
 
         result = acquire_images(cam, nodemap, nodemap_tldevice)
-        print 'acquire_images returned:', result
+        print '\tacquire_images returned:', result
 
         mutex_cam.release()
-        print 'Released mutex.'
+        print '\tReleased mutex.'
 
-        # Sleep in this thread until next time interval
-        time.sleep(next_call - time.time())
+        finished_acquisition = time.time()
+        if next_call > finished_acquisition :
+            # Sleep in this thread until next time interval
+            time.sleep(next_call - finished_acquisition)
+        else:
+            # the interval time has passed, start next acquisition immediately
+            next_call = time.time()
 
 
 def timer_trigger_start(cam, nodemap, nodemap_tldevice):
