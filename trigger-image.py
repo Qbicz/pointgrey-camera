@@ -61,14 +61,9 @@ def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     """
         Start image triggering.
     """
-    try:
-        timerThread = threading.Thread(target=timer_trigger, args=(cam, nodemap, nodemap_tldevice))
-
-        timerThread.daemon = True
-        timerThread.start()
-    except:
-        del cam
-        del nodemap
+    timerThread = threading.Thread(target=timer_trigger, args=(cam, nodemap, nodemap_tldevice))
+    timerThread.daemon = True
+    timerThread.start()
 
 
 def acquire_images(cam, nodemap, nodemap_tldevice):
