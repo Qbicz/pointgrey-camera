@@ -61,7 +61,8 @@ def timer_trigger_start(cam, nodemap, nodemap_tldevice):
     """
         Start image triggering.
     """
-    timerThread = threading.Thread(target=timer_trigger, args=(weakref.ref(cam), nodemap, nodemap_tldevice))
+    cam_ref = weakref.ref(cam)
+    timerThread = threading.Thread(target=timer_trigger, args=(cam_ref(), nodemap, nodemap_tldevice))
     timerThread.daemon = True
     timerThread.start()
 
